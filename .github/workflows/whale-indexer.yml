@@ -1,38 +1,25 @@
-name: Whale Indexer
-
+name: hl-indexer
 on:
+  workflow_dispatch:
   schedule:
-    # Every 15 minutes — adjust as you like
-    - cron: "*/15 * * * *"
-  workflow_dispatch: {}
-
+    - cron: "*/30 * * * *"   # every 30 minutes
 jobs:
   run-indexer:
     runs-on: ubuntu-latest
-    timeout-minutes: 20  # ensure it cannot hang forever
+    timeout-minutes: 65
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run indexer
-        env:
-          # REQUIRED: set this in your repo Settings → Secrets and variables → Actions → New repository secret
-          REDIS_URL: ${{ secrets.REDIS_URL }}
-          # OPTIONAL: override defaults
+      - run: pip install requests redis websocket-client
+      - env:
+          REDIS_URL: ${{ secrets.REDIS_URL }}   # MUST MATCH your Dash app URL exactly
           COIN: BTC
-          NOTIONAL_THRESHOLD: "10000000"   # 10M
-          DURATION_SECONDS: "600"          # 10 minutes of listening
-          REQUEST_TIMEOUT: "5"
-          THROTTLE_SECONDS: "30"
-        run: |
-          python indexer.py
+          NOTIONAL_THRESHOLD: "1000000"         # start at $1M for better capture rate
+          DURATION_SECONDS: "1800"              # 30 min per run
+          REQUEST_TIMEOUT: "7"
+          THROTTLE_SECONDS: "15"
+          META_TTL_SECONDS: "14400"             # 4h
+          VERBOSE: "0"
+        run: python indexer.py
