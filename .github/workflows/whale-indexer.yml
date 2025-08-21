@@ -16,7 +16,7 @@ jobs:
       - env:
           REDIS_URL: ${{ secrets.REDIS_URL }}   # MUST MATCH your Dash app URL exactly
           COIN: BTC
-          NOTIONAL_THRESHOLD: "1000000"         # start at $1M for better capture rate
+          NOTIONAL_THRESHOLD: "100000"         # start at $1M for better capture rate
           DURATION_SECONDS: "1800"              # 30 min per run
           REQUEST_TIMEOUT: "7"
           THROTTLE_SECONDS: "15"
